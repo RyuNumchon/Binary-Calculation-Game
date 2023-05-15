@@ -3,11 +3,12 @@
 A single player Binary Calculation game: Arduino project
 
 Required components:
-a) 1 Arduino Board
-b) 6 switches
-c) 4 LEDs
-d) 10 330-Ohm resisotrs
-e) wires
+1) 1 Arduino Board
+2) 6 switches
+3) 4 LEDs
+4) 10 330-Ohm resisotrs
+5) a breadboard
+6) wires
 
 Explanation:
 This project is a Binary Number Calculation game, which is designed to be played using an
