@@ -1,65 +1,147 @@
-  // Display fail state
+#include <Arduino.h>
+
+// Define LED pins
+const int LED_pins[] = {2, 3, 4, 5, 6};
+
+// Define button pins
+const int operator_plus_pin = 7;
+const int operator_minus_pin = 8;
+const int digit_1_pin = 9;
+const int digit_2_pin = 10;
+const int digit_3_pin = 11;
+const int digit_4_pin = 12;
+const int enter_pin = 13;
+
+// Define game variables
+int operand1 = 0;
+int operand2 = 0;
+char game_operator = '+';
+int level = 1;
+
+// Define functions
+void displayBinary(int num);
+void displayAlternatingBinary();
+void turnOffLEDs();
+void getOperand(int &operand);
+char getOperator();
+void waitForEnter();
+void displaySuccess();
+void displayFail();
+void displayWinning();
+void playGame();
+
+void setup() {
+  // Initialize LED pins
   for (int i = 0; i < 5; i++) {
-    digitalWrite(LED_pins[i], HIGH);
-    delay(100);
+    pinMode(LED_pins[i], OUTPUT);
+  }
+
+  // Initialize button pins
+  pinMode(operator_plus_pin, INPUT_PULLUP);
+  pinMode(operator_minus_pin, INPUT_PULLUP);
+  pinMode(digit_1_pin, INPUT_PULLUP);
+  pinMode(digit_2_pin, INPUT_PULLUP);
+  pinMode(digit_3_pin, INPUT_PULLUP);
+  pinMode(digit_4_pin, INPUT_PULLUP);
+  pinMode(enter_pin, INPUT_PULLUP);
+
+  // Set random seed
+  randomSeed(analogRead(0));
+
+  // Display alternating binary before game starts
+  displayAlternatingBinary();
+}
+
+void loop() {
+  // Play the game
+  playGame();
+}
+
+void displayBinary(int num) {
+  // Convert the number to binary and display it on the LEDs
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(LED_pins[i], num % 2);
+    num /= 2;
+  }
+}
+
+void displayAlternatingBinary() {
+  // Display alternating binary pattern
+  for (int i = 0; i < 10; i++) {
+    displayBinary(i % 2 ? 18 : 5);
+    delay(500);
+  }
+  turnOffLEDs();
+}
+
+void turnOffLEDs() {
+  // Turn off all LEDs
+  for (int i = 0; i < 5; i++) {
     digitalWrite(LED_pins[i], LOW);
   }
 }
 
-void displayWinning() {
-  // Display winning state
-  for (int i = 0; i < 3; i++) {
-    displayBinary(15);
-    delay(200);
-    turnOffLEDs();
-    delay(200);
+void getOperand(int &operand) {
+  // Get operand from player input
+  operand = 0;
+  for (int i = 1; i <= 4; i++) {
+    if (!digitalRead(i + 8)) {
+      operand += pow(2, i - 1);
+    }
   }
 }
 
-void playGame() {
-  // Generate random operands
-  operand1 = random(1, pow(2, level));
-  operand2 = random(1, pow(2, level));
-  
+char getOperator() {
   // Get operator from player input
-  game_operator = getOperator();
-  
-  // Get operand from player input
-  getOperand(operand2);
-  
-  // Calculate correct answer
-  int correct_answer;
-  if (game_operator == '+') {
-    correct_answer = operand1 + operand2;
-  } else {
-    correct_answer = operand1 - operand2;
+  char op;
+  if (!digitalRead(operator_plus_pin)) {
+    op = '+';
+  } else if (!digitalRead(operator_minus_pin)) {
+    op = '-';
   }
-  
-  // Display equation on LEDs
-  displayBinary(operand1);
-  digitalWrite(LED_pins[2], game_operator == '-' ? HIGH : LOW);
-  displayBinary(operand2);
-  delay(1000);
-  
-  // Get player answer
-  int player_answer;
-  getOperand(player_answer);
-  
-  // Check player answer
-  if (player_answer == correct_answer) {
-    displaySuccess();
-    level++;
-    if (level == 6) {
-      displayWinning();
-      level = 1;
-    }
-  } else {
-    displayFail();
-  }
-  
+  return op;
+}
+
+void waitForEnter() {
   // Wait for player to press enter
-  waitForEnter();
-  
-  // Clear LEDs
+  while (digitalRead(enter_pin)) {
+    delay(50);
+  }
+  while (!digitalRead(enter_pin)) {
+    delay(50);
+  }
+}
+void displaySuccess() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    turnOffLEDs();
+    bitSet(LEDs[i], i);
+    digitalWrite(LED_PINS[i], HIGH);
+    delay(500);
+  }
   turnOffLEDs();
+}
+
+void displayFail() {
+  for (int i = 0; i < 5; i++) {
+    turnOffLEDs();
+    digitalWrite(LED_PINS[i], HIGH);
+  }
+  delay(500);
+  for (int i = 0; i < 5; i++) {
+    turnOffLEDs();
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  delay(500);
+}
+
+void waitForEnter() {
+  while (!digitalRead(ENTER_PIN));
+  delay(500);
+}
+
+void displayWinning() {
+  turnOffLEDs();
+  for (int i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LED_PINS[i], HIGH);
+  }
 }
