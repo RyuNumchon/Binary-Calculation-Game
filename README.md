@@ -1,4 +1,5 @@
 #Binary Calculation Game
+
 A single player Binary Calculation game: Arduino project.
 
 Required components:
