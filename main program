@@ -1,1 +1,65 @@
+  // Display fail state
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(LED_pins[i], HIGH);
+    delay(100);
+    digitalWrite(LED_pins[i], LOW);
+  }
+}
 
+void displayWinning() {
+  // Display winning state
+  for (int i = 0; i < 3; i++) {
+    displayBinary(15);
+    delay(200);
+    turnOffLEDs();
+    delay(200);
+  }
+}
+
+void playGame() {
+  // Generate random operands
+  operand1 = random(1, pow(2, level));
+  operand2 = random(1, pow(2, level));
+  
+  // Get operator from player input
+  game_operator = getOperator();
+  
+  // Get operand from player input
+  getOperand(operand2);
+  
+  // Calculate correct answer
+  int correct_answer;
+  if (game_operator == '+') {
+    correct_answer = operand1 + operand2;
+  } else {
+    correct_answer = operand1 - operand2;
+  }
+  
+  // Display equation on LEDs
+  displayBinary(operand1);
+  digitalWrite(LED_pins[2], game_operator == '-' ? HIGH : LOW);
+  displayBinary(operand2);
+  delay(1000);
+  
+  // Get player answer
+  int player_answer;
+  getOperand(player_answer);
+  
+  // Check player answer
+  if (player_answer == correct_answer) {
+    displaySuccess();
+    level++;
+    if (level == 6) {
+      displayWinning();
+      level = 1;
+    }
+  } else {
+    displayFail();
+  }
+  
+  // Wait for player to press enter
+  waitForEnter();
+  
+  // Clear LEDs
+  turnOffLEDs();
+}
