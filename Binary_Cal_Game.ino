@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 //All swithes in this code are pull-up switches (default = 1)
 int LED[] = {9, 10, 11, 12, 13};  //LED for binary number
@@ -17,6 +18,8 @@ char currentOperator = '+';       //Current operator
 
 void setup() {
   Serial.begin(9600);
+  srand(time(NULL)); //randomize seed setup (so everytime rand() is called, it gives different. number)
+    
   Serial.println("Welcome to Binary Calculation Game!");
   for (int i = 0; i < N_LED; i++) {
     //Set all LED pins to be output mode and set the initial values to be LOW
