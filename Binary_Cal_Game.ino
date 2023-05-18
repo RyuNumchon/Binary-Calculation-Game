@@ -9,6 +9,7 @@ int C_Delay = 500;                //Time delay for Christmas lighting
 int L_Delay = 5000;               //Time delay for 5-bit binary
 int OF = HIGH;                    //On/off value of the first LED in christmas light
 int LEVEL = 1;                    //Current game LEVEL
+int MAX_LEVEL = 8;                //Maximum game Level
 int GoalResult = 0;               //Goal binary result
 int operand1 = 0;                 //First operand
 int operand2 = 0;                 //Second operand
@@ -42,7 +43,7 @@ void loop() {
 
 void waitForStart() {
   for (int i = 0; i < N_LED; i++) {
-    if (i%2 == 0) {
+    if (i % 2 == 0) {
       digitalWrite(LED[i],OF);
     }
     else {
@@ -58,9 +59,13 @@ void playGame() {
   generateGoalResult();
   delay(L_Delay);
   clearLED();
+  Serial.print("\nEnter 1st operand:");
   operand1 = getOperand();
+  Serial.print(operand1 + "\nEnter Operator:");
   currentOperator = getOperator();
+  Serial.print(currentOperator + "\nEnter 2 operand:");
   operand2 = getOperand();
+  Serial.print(operand2);
 
   int playerResult;
   if (currentOperator == '+') {
@@ -72,7 +77,7 @@ void playGame() {
   if (playerResult == GoalResult) {
     displaySuccess();
     LEVEL++;
-    if (LEVEL == 8) {
+    if (LEVEL == MAX_LEVEL) { 
       displayWinning();
       LEVEL = 1;
     }
@@ -91,9 +96,11 @@ void clearLED() {
 }
 
 void generateGoalResult() {
-  int ub = 32; //upperbound
-  int lb = 0; //increase depending on LEVELs (max = 16)
-  //randomize number between 0&31
+  //upperbound (Maximum of binary with 5 digits = 31
+  int ub = 32;
+  //Lowerbound - increase depending on LEVELs (max = 16)
+  int lb = 0;
+  //randomize number between lb & ub
   GoalResult = (rand() % (ub - lb + 1)) + lb;
   displayBinary(GoalResult);
 }
@@ -107,8 +114,9 @@ int getOperand() {
 }
 
 char getOperator() {
-  // Wait for operator button press
-  while (digitalRead(OP[0]) == HIGH && digitalRead(OP[1]) == HIGH)
+  while (digitalRead(OP[0]) == HIGH && digitalRead(OP[1]) == HIGH){
+    // Wait for operator button press
+  }
   if (digitalRead(OP[0]) == LOW) {
     return '+';
   } else {
@@ -125,7 +133,6 @@ void displayBinary(int number) {
 void displaySuccess() {
   clearLED();
   for (int i = 0; i < 5; i++) {
-    // bitSet(LED[i], i);
     if (i >= 1) {
       digitalWrite(LED[i - 1], LOW);
     }
