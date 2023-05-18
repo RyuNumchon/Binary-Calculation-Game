@@ -1,147 +1,157 @@
 #include <Arduino.h>
 
-// Define LED pins
-const int LED_pins[] = {2, 3, 4, 5, 6};
+const int LED_PINS[] = {9, 10, 11, 12, 13};  // Pins for LED digits
+const int OPERATOR_PLUS_PIN = 2;        // Pin for operator +
+const int OPERATOR_MINUS_PIN = 3;       // Pin for operator -
+const int ENTER_PIN = 8;                // Pin for enter button
 
-// Define button pins
-const int operator_plus_pin = 7;
-const int operator_minus_pin = 8;
-const int digit_1_pin = 9;
-const int digit_2_pin = 10;
-const int digit_3_pin = 11;
-const int digit_4_pin = 12;
-const int enter_pin = 13;
+// Define pin numbers for operand buttons
+const int OPERAND1_PIN = 4;
+const int OPERAND2_PIN = 5;
+const int OPERAND3_PIN = 6;
+const int OPERAND4_PIN = 7;
 
-// Define game variables
-int operand1 = 0;
-int operand2 = 0;
-char game_operator = '+';
-int level = 1;
-
-// Define functions
-void displayBinary(int num);
-void displayAlternatingBinary();
-void turnOffLEDs();
-void getOperand(int &operand);
-char getOperator();
-void waitForEnter();
-void displaySuccess();
-void displayFail();
-void displayWinning();
-void playGame();
+int level = 1;                          // Current game level
+int goalResult = 0;                     // Goal binary result
+int operand1 = 0;                       // First operand
+int operand2 = 0;                       // Second operand
+char currentOperator = '+';             // Current operator
 
 void setup() {
-  // Initialize LED pins
   for (int i = 0; i < 5; i++) {
-    pinMode(LED_pins[i], OUTPUT);
+    pinMode(LED_PINS[i], OUTPUT);
   }
+  pinMode(OPERATOR_PLUS_PIN, INPUT_PULLUP);
+  pinMode(OPERATOR_MINUS_PIN, INPUT_PULLUP);
+  pinMode(ENTER_PIN, INPUT_PULLUP);
 
-  // Initialize button pins
-  pinMode(operator_plus_pin, INPUT_PULLUP);
-  pinMode(operator_minus_pin, INPUT_PULLUP);
-  pinMode(digit_1_pin, INPUT_PULLUP);
-  pinMode(digit_2_pin, INPUT_PULLUP);
-  pinMode(digit_3_pin, INPUT_PULLUP);
-  pinMode(digit_4_pin, INPUT_PULLUP);
-  pinMode(enter_pin, INPUT_PULLUP);
+  pinMode(OPERAND1_PIN, INPUT_PULLUP);
+  pinMode(OPERAND2_PIN, INPUT_PULLUP);
+  pinMode(OPERAND3_PIN, INPUT_PULLUP);
+  pinMode(OPERAND4_PIN, INPUT_PULLUP);
 
-  // Set random seed
-  randomSeed(analogRead(0));
-
-  // Display alternating binary before game starts
-  displayAlternatingBinary();
+  randomSeed(analogRead(0));  // Initialize random seed
 }
 
 void loop() {
-  // Play the game
+  displayAlternatingBinary();
   playGame();
 }
 
-void displayBinary(int num) {
-  // Convert the number to binary and display it on the LEDs
-  for (int i = 0; i < 5; i++) {
-    digitalWrite(LED_pins[i], num % 2);
-    num /= 2;
-  }
-}
-
 void displayAlternatingBinary() {
-  // Display alternating binary pattern
-  for (int i = 0; i < 10; i++) {
-    displayBinary(i % 2 ? 18 : 5);
+  int i=0; 
+  while(digitalRead(8)){
+    if(i % 2){
+      displayBinary(21);
+    }
+    else{
+      displayBinary(10);
+    }
     delay(500);
+    i++
   }
-  turnOffLEDs();
 }
 
 void turnOffLEDs() {
-  // Turn off all LEDs
   for (int i = 0; i < 5; i++) {
-    digitalWrite(LED_pins[i], LOW);
+    digitalWrite(LED_PINS[i], LOW);
   }
 }
 
-void getOperand(int &operand) {
-  // Get operand from player input
-  operand = 0;
-  for (int i = 1; i <= 4; i++) {
-    if (!digitalRead(i + 8)) {
-      operand += pow(2, i - 1);
-    }
+void playGame() {
+  generateGoalResult();
+  delay(5000);
+  turnOffLEDs();
+  operand1 = getOperand();
+  currentOperator = getOperator();
+  operand2 = getOperand();
+
+  int playerResult;
+  if (currentOperator == '+') {
+    playerResult = operand1 + operand2;
+  } else {
+    playerResult = operand1 - operand2;
   }
+
+  if (playerResult == goalResult) {
+    displaySuccess();
+    level++;
+    if (level == 16) {
+      displayWinning();
+      level = 1;
+    }
+  } else {
+    displayFail();
+    level = 1;
+  }
+
+  delay(2000);
+}
+
+void generateGoalResult() {
+   //randomize number between 0&31
+  goalResult = rand() % 31;
+  displayBinary(goalResult);
+}
+
+int getOperand() {
+  int operand = 0;
+  operand |= digitalRead(OPERAND1_PIN) << 3;
+  operand |= digitalRead(OPERAND2_PIN) << 2;
+  operand |= digitalRead(OPERAND3_PIN) << 1;
+  operand |= digitalRead(OPERAND4_PIN);
+  return operand;
 }
 
 char getOperator() {
-  // Get operator from player input
-  char op;
-  if (!digitalRead(operator_plus_pin)) {
-    op = '+';
-  } else if (!digitalRead(operator_minus_pin)) {
-    op = '-';
+  while (digitalRead(OPERATOR_PLUS_PIN) == HIGH && digitalRead(OPERATOR_MINUS_PIN) == HIGH) {
+    // Wait for operator button press
   }
-  return op;
+  if (digitalRead(OPERATOR_PLUS_PIN) == LOW) {
+    return '+';
+  } else {
+    return '-';
+  }
 }
 
-void waitForEnter() {
-  // Wait for player to press enter
-  while (digitalRead(enter_pin)) {
-    delay(50);
-  }
-  while (!digitalRead(enter_pin)) {
-    delay(50);
+void displayBinary(int number) {
+  for (int i = 4; i >= 0; i--) {
+    digitalWrite(LED_PINS[i], (number >> (4 - i)) & 1);
   }
 }
+
 void displaySuccess() {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    turnOffLEDs();
-    bitSet(LEDs[i], i);
+  turnOffLEDs();
+  for (int i = 0; i < 5; i++) {
+    // bitSet(LEDs[i], i);
+    if(i>=1){
+      digitalWrite(LED_PINS[i-1], LOW);
+    }
     digitalWrite(LED_PINS[i], HIGH);
     delay(500);
   }
-  turnOffLEDs();
 }
 
 void displayFail() {
-  for (int i = 0; i < 5; i++) {
-    turnOffLEDs();
-    digitalWrite(LED_PINS[i], HIGH);
+  while (digitalRead(8)) {
+    for (int i = 0; i < 5; i++) {
+      digitalWrite(LED_PINS[i], HIGH);
+    }
+    delay(500);
+    for (int i = 0; i < 5; i++) {
+      digitalWrite(LED_PINS[i], LOW);
+    }
+    delay(500);
   }
-  delay(500);
-  for (int i = 0; i < 5; i++) {
-    turnOffLEDs();
-    digitalWrite(LED_PINS[i], LOW);
-  }
-  delay(500);
-}
-
-void waitForEnter() {
-  while (!digitalRead(ENTER_PIN));
-  delay(500);
 }
 
 void displayWinning() {
-  turnOffLEDs();
-  for (int i = 0; i < NUM_LEDS; i++) {
+  for (int i = 0; i < 5; i++) {
     digitalWrite(LED_PINS[i], HIGH);
   }
+  delay(1000);
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(LED_PINS[i], LOW);
+  }
+  delay(1000);
 }
