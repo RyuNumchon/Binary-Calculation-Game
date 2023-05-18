@@ -19,7 +19,7 @@ int operand2 = 0;            // Second operand
 char currentOperator = '+';  // Current operator
 
 void setup() {
-  Serial.
+  Serial.begin(9600);
   for (int i = 0; i < 5; i++) {
     pinMode(LED_PINS[i], OUTPUT);
   }
@@ -92,8 +92,8 @@ void playGame() {
 }
 
 void generateGoalResult() {
-  ub = 32; //upperbound
-  lb = 0; //increase depending on levels (max = 16)
+  int ub = 32; //upperbound
+  int lb = 0; //increase depending on levels (max = 16)
   //randomize number between 0&31
   goalResult = (rand() % (ub - lb + 1)) + lb;
   displayBinary(goalResult);
