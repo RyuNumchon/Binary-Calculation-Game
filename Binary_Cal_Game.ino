@@ -2,7 +2,7 @@
 #include <PinChangeInterrupt.h>
 
 //All swithes in this code are pull-up switches (default = 1)
-int LED[] = { 9, 10, 11, 12, 13 };  //LED for binary number
+int LED[] = { 9, 10, 11, 12, 13 };  //LED for binary number (MSB = 9)
 int N_LED = 5;                      //5-bit binary number
 int SW[] = { 4, 5, 6, 7, 8 };       //4 switches for each input bit, and 1 switch for '='
 int OP[] = { 2, 3 };                //2 switches for operators: pin2 for '+' and pin3 for '-'
