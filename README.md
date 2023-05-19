@@ -3,10 +3,10 @@
 A single player Binary Calculation game: Arduino project
 
 Required components:
-1) 1 Arduino Board
-2) 6 switches
-3) 4 LEDs
-4) 10 330-Ohm resisotrs
+1) 1 Arduino Uno Board
+2) 7 Pushbutton/switche
+3) 5 LED
+4) 12 330-Ohm resisotrs
 5) a breadboard
 6) wires
 
@@ -14,9 +14,9 @@ Explanation:
 This project is a Binary Number Calculation game, which is designed to be played using an
 Arduino board, a breadboard, 5 LEDs, and 7 switches. The goal of the game is for the player
 to correctly calculate the result of a binary calculation by inputting two operands and an
-operator. The game has 15 levels, and the difficulty increases with each level.
+operator. The game has 5 levels, and the difficulty increases with each level.
 The game starts with the LEDs lighting up alternately indicating the start of the level. Once
-the user presses the enter switch, the board generates a goal 5-digit binary result that the
+the user presses the enter switch, the board generates a goal of maximum 5-digit binary result that the
 player has to achieve. After 5 seconds, all the LEDs are turned off indicating that the player
 has to enter the first operand. The player then does so by toggling the corresponding switch,
 followed by the operator (either addition or subtraction), and then the second operand. Once
