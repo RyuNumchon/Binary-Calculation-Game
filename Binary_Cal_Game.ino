@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "PinChangeInterrupt.h"
+#include <PinChangeInterrupt.h>
 
 //All swithes in this code are pull-up switches (default = 1)
 int LED[] = { 9, 10, 11, 12, 13 };  //LED for binary number
@@ -21,7 +21,9 @@ int operand = 0;
 
 void setup() {
   Serial.begin(9600);
+
   Serial.println("Welcome to Binary Calculation Game!");
+
   for (int i = 0; i < N_LED; i++) {
     //Set all LED pins to be output mode and set the initial values to be LOW
     pinMode(LED[i], OUTPUT);
@@ -29,13 +31,16 @@ void setup() {
     //Set 5 switch pins to be input mode
     pinMode(SW[i], INPUT_PULLUP);
     if (i != 4) {
-      attachPCINT(digitalPinToPCINT(SW[i]), getOperand, CHANGE);
+      attachPCINT(digitalPinToPCINT(SW[i]), getOperand, FALLING);
     }
   }
+
   //Set 2 operator-switch pins to be input mode
   pinMode(OP[0], INPUT);
   pinMode(OP[1], INPUT);
+
   delay(H_DELAY);
+
   Serial.println("Please press enter switch to start.");
 }
 
@@ -46,10 +51,13 @@ void loop() {
     while (pressEnter()) {
       seed++;
       waitForStart();
+      
       delay(H_DELAY);
+    
     }
     srand(seed);  //randomize seed setup
   }
+
   playGame();
 }
 
@@ -72,48 +80,67 @@ void waitForStart() {
 }
 
 void playGame() {
+  Serial.println("\nLEVEL: " + String(LEVEL));
   int playerResult;
-  
+
   enter = false;
+
   clearLED();
+  
   delay(1500);
+
   generateGoalResult();
+  
   delay(F_DELAY);
+  
   clearLED();
+
   operand = 0;
   enter = true;   
   token = true;
-  Serial.println("Debug note1 : token = " + String(token));
+
   while (pressEnter());
   Serial.println("Enter 1st operand: ");
   operand1 = operand;
-  enter = false;  token = false;
+
+  enter = false;
+  token = false;
+
   Serial.print("\noperand1 = " + String(operand1) + "\nEnter Operator: ");
   currentOperator = getOperator();
-  Serial.print(String(currentOperator) + "\nEnter 2nd operand: ");
+
+  Serial.print(String(currentOperator) + "\nEnter 2nd operand:\n");
   clearLED();
+
   operand = 0;
-  enter = true;   token = true;
+  enter = true;
+  token = true;
+
   while (pressEnter());
   Serial.println("Test for OG operand = " + String(operand));
   operand2 = operand;
   Serial.println("operand2 = " + String(operand2));
-  enter = false;  token = false;
+
+  enter = false;
+  token = false;
+
   if (currentOperator == '+') {
     playerResult = operand1 + operand2;
   } else {
     playerResult = operand1 - operand2;
   }
+
   Serial.println("playerResult = " + String(playerResult));
   Serial.println("GoalResult = " + String(GoalResult));
   delay(H_DELAY);
+
   enter = true;
-  Serial.println("Debug note enter: " + String(enter));
+
   if (playerResult == GoalResult) {
     Serial.println("Correct");
     displaySuccess();
     LEVEL++;
-    if (LEVEL == MAX_LEVEL) {
+    if (LEVEL > MAX_LEVEL) {
       Serial.println("Won");
       displayWinning();
       LEVEL = 1;
@@ -134,27 +161,37 @@ void clearLED() {
 }
 
 void generateGoalResult() {
-  //upperbound (Maximum of binary with 5 digits = 31)
+  //upperbound (Maximum of binary with 5 digits = 30)
   int ub = 31;
-  //Lowerbound - increase depending on LEVELs (max = 16)
-  int lb = 5 * LEVEL;
+  //Lowerbound - affects game difficulty
+  int lb = myCeil((30 - 1) / MAX_LEVEL) * LEVEL ;
   //randomize number between lb & ub
   GoalResult = (rand() % (ub - lb + 1)) + lb;
   Serial.println("Randomized Result = " + String(GoalResult));
   displayBinary(GoalResult);
 }
 
+int myCeil(float f) {
+  int n = int(f);
+  if (f > n) {
+    return n+1;
+  }
+  else {
+    return n;
+  }
+}
+
 void getOperand() {
-  // Serial.println("Debug note 2: token b4 if = " + String(token));
   if (token) {
-    // Serial.println("Debug note2: token af if = " + String(token));
     int sw = input();
     int led = digitalRead(LED[sw-3]);
+
     if (led) {
       operand &= ~(1 << (3 - (sw-4)));
     } else {
       operand |= 1 << (3 - (sw-4));
     }
+
     Serial.println("Current operand: " + String(operand));
     digitalWrite(LED[sw-3], !led);
   }
@@ -163,7 +200,6 @@ void getOperand() {
 int input() {
   for (int i = 0; i < 4; i++) {
     if (!digitalRead(SW[i])) {
-      Serial.println("Switch pressed: " + String(SW[i]));
       return SW[i];
     }
   }
@@ -171,6 +207,7 @@ int input() {
 
 char getOperator() {
   while (digitalRead(OP[0]) && digitalRead(OP[1])); // Wait for operator button press
+  
   if (digitalRead(OP[0]) == LOW) {
     return '+';
   } else {
@@ -186,11 +223,13 @@ void displayBinary(int number) {
 
 void displaySuccess() {
   clearLED();
+
   for (int i = 0; i < 5; i++) {
     if (i >= 1) {
       digitalWrite(LED[i - 1], LOW);
     }
     digitalWrite(LED[i], HIGH);
+    
     delay(H_DELAY);
   }
 }
@@ -200,7 +239,9 @@ void displayFail() {
     for (int i = 0; i < 5; i++) {
       digitalWrite(LED[i], OF);
     }
+    
     delay(H_DELAY);
+    
     OF = !OF;
   }
 }
@@ -214,6 +255,8 @@ void displayWinning() {
     }
     displayBinary(win[i]);
     i++;
+    
     delay(H_DELAY);
+  
   }
 }
