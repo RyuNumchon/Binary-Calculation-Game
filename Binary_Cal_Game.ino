@@ -21,7 +21,7 @@ int operand = 0;
 
 void setup() {
   Serial.begin(9600);
-
+  Serial.println("This game is developed by \nApinya Sriyota   Student ID: 6322771534 \nAnd\nKongpanat Tangphonphisuth   Student ID: 6322790120");
   Serial.println("Welcome to Binary Calculation Game!");
 
   for (int i = 0; i < N_LED; i++) {
@@ -162,7 +162,7 @@ void clearLED() {
 
 void generateGoalResult() {
   //upperbound (Maximum of binary with 5 digits = 30)
-  int ub = 31;
+  int ub = 30;
   //Lowerbound - affects game difficulty
   int lb = myCeil((30 - 1) / MAX_LEVEL) * LEVEL ;
   //randomize number between lb & ub
